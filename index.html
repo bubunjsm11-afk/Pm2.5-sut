@@ -179,9 +179,11 @@ async function fetchAQI() {
   const overlay = document.getElementById('loadingOverlay');
   overlay.style.display = 'flex';
   try {
-    const url = `https://corsproxy.io/?https://api.airvisual.com/v2/city?city=${encodeURIComponent(CITY)}&state=${encodeURIComponent(STATE)}&country=${encodeURIComponent(COUNTRY)}&key=${API_KEY}`;
+    const proxyUrl = `https://api.airvisual.com/v2/city?city=${encodeURIComponent(CITY)}&state=${encodeURIComponent(STATE)}&country=${encodeURIComponent(COUNTRY)}&key=${API_KEY}`;
+    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(proxyUrl)}`;
     const res = await fetch(url);
-    const json = await res.json();
+    const wrapper = await res.json();
+    const json = JSON.parse(wrapper.contents);
     if (json.status !== 'success') throw new Error(json.data?.message || 'API Error');
     const pollution = json.data.current.pollution;
     const weather = json.data.current.weather;
