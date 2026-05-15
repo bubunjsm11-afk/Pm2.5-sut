@@ -7,54 +7,90 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-  :root { --bg: #0a0f1e; --card: #111827; --border: rgba(255,255,255,0.07); --accent: #38bdf8; --accent2: #818cf8; --good: #22c55e; --text: #f1f5f9; --muted: #64748b; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
-  .wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
-  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 16px; animation: fadeDown 0.6s ease both; }
-  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-  .logo { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
-  .logo span { color: var(--muted); }
-  .live-badge { display: flex; align-items: center; gap: 8px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--good); }
-  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
-  .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 36px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; animation: fadeUp 0.6s 0.1s ease both; position: relative; overflow: hidden; }
-  .main-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 250px; height: 250px; border-radius: 50%; background: radial-gradient(circle, rgba(56,189,248,0.08), transparent 70%); pointer-events: none; }
-  .aqi-display { text-align: center; }
-  .aqi-ring { position: relative; width: 180px; height: 180px; margin: 0 auto 16px; }
-  .aqi-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-  .aqi-ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 10; }
-  .aqi-ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; stroke: var(--accent); stroke-dasharray: 440; stroke-dashoffset: 440; transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1), stroke 0.5s ease; }
-  .aqi-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .aqi-number { font-family: 'Space Mono', monospace; font-size: 52px; font-weight: 700; color: var(--accent); line-height: 1; transition: color 0.5s ease; }
-  .aqi-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; margin-top: 4px; }
-  .aqi-status { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; background: rgba(56,189,248,0.15); color: var(--accent); transition: all 0.5s ease; }
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .stat-box { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-  .stat-box .s-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .stat-box .s-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: var(--text); }
-  .stat-box .s-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .location-info { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); padding-top: 8px; border-top: 1px solid var(--border); }
-  .location-info span { color: var(--text); font-weight: 500; }
-  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; animation: fadeUp 0.6s 0.2s ease both; }
-  .card-title { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
-  .scale-bar { display: flex; border-radius: 8px; overflow: hidden; height: 10px; margin-bottom: 12px; }
-  .scale-seg { flex: 1; }
-  .scale-seg.s1 { background: #22c55e; } .scale-seg.s2 { background: #facc15; } .scale-seg.s3 { background: #f97316; } .scale-seg.s4 { background: #ef4444; } .scale-seg.s5 { background: #a855f7; }
-  .scale-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 14px; }
-  .scale-items { display: flex; flex-direction: column; gap: 8px; }
-  .scale-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .scale-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .scale-item .range { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-left: auto; }
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-bottom: 20px; animation: fadeUp 0.6s 0.25s ease both; }
-  .chart-container { height: 200px; position: relative; }
-  .alert-card { background: linear-gradient(135deg, #0f172a, #1e1b4b); border: 1px solid rgba(129,140,248,0.2); border-radius: 20px; padding: 28px; animation: fadeUp 0.6s 0.3s ease both; position: relative; overflow: hidden; }
-  .alert-title { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-  .alert-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
-  .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .form-input { flex: 1; min-width: 200px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 16px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; }
-  .form-input::placeholder { color: var(--muted); }
-  .btn-subscribe { background: var​​​​​​​​​​​​​​​​
+  :root{--bg:#0a0f1e;--card:#111827;--border:rgba(255,255,255,0.07);--accent:#38bdf8;--accent2:#818cf8;--good:#22c55e;--text:#f1f5f9;--muted:#64748b}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+  .wrapper{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;flex-wrap:wrap;gap:16px}
+  .logo{font-family:'Space Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
+  .logo span{color:var(--muted)}
+  .live-badge{display:flex;align-items:center;gap:8px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--good)}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.3)}}
+  .main-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:36px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;position:relative;overflow:hidden}
+  .aqi-display{text-align:center}
+  .aqi-ring{position:relative;width:180px;height:180px;margin:0 auto 16px}
+  .aqi-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .aqi-ring-bg{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:10}
+  .aqi-ring-fill{fill:none;stroke-width:10;stroke-linecap:round;stroke:var(--accent);stroke-dasharray:440;stroke-dashoffset:440;transition:stroke-dashoffset 1.5s ease,stroke 0.5s ease}
+  .aqi-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .aqi-number{font-family:'Space Mono',monospace;font-size:52px;font-weight:700;color:var(--accent);line-height:1}
+  .aqi-label{font-size:11px;color:var(--muted);letter-spacing:2px;margin-top:4px}
+  .aqi-status{display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;text-transform:uppercase;background:rgba(56,189,248,0.15);color:var(--accent)}
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat-box{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:16px}
+  .stat-box .s-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+  .stat-box .s-value{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--text)}
+  .stat-box .s-unit{font-size:11px;color:var(--muted);margin-top:2px}
+  .location-info{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding-top:8px;border-top:1px solid var(--border)}
+  .location-info span{color:var(--text);font-weight:500}
+  .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px}
+  .card-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+  .scale-bar{display:flex;border-radius:8px;overflow:hidden;height:10px;margin-bottom:12px}
+  .scale-seg{flex:1}
+  .scale-seg.s1{background:#22c55e}.scale-seg.s2{background:#facc15}.scale-seg.s3{background:#f97316}.scale-seg.s4{background:#ef4444}.scale-seg.s5{background:#a855f7}
+  .scale-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:14px}
+  .scale-items{display:flex;flex-direction:column;gap:8px}
+  .scale-item{display:flex;align-items:center;gap:10px;font-size:13px}
+  .scale-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .scale-item .range{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-left:auto}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px}
+  .chart-container{height:200px;position:relative}
+  .alert-card{background:linear-gradient(135deg,#0f172a,#1e1b4b);border:1px solid rgba(129,140,248,0.2);border-radius:20px;padding:28px;position:relative;overflow:hidden}
+  .alert-title{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text)}
+  .alert-desc{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+  .form-row{display:flex;gap:10px;flex-wrap:wrap}
+  .form-input{flex:1;min-width:200px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none}
+  .form-input::placeholder{color:var(--muted)}
+  .btn-subscribe{background:var(--accent2);color:white;border:none;border-radius:10px;padding:12px 24px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .success-msg{display:none;align-items:center;gap:8px;font-size:14px;color:var(--good);margin-top:12px}
+  .refresh-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+  .last-updated{font-size:12px;color:var(--muted)}
+  .btn-refresh{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);border-radius:8px;padding:7px 14px;color:var(--accent);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer}
+  .loading-overlay{display:none;position:absolute;inset:0;background:rgba(10,15,30,0.7);border-radius:24px;align-items:center;justify-content:center;z-index:10;font-size:13px;color:var(--accent);gap:10px}
+  .spinner{width:18px;height:18px;border:2px solid rgba(56,189,248,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  footer{text-align:center;font-size:12px;color:var(--muted);margin-top:40px;padding-top:24px;border-top:1px solid var(--border)}
+  @media(max-width:640px){.main-card{grid-template-columns:1fr}.bottom-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <div class="logo">PM<span>/</span>2.5 Monitor <span>— SUT Korat</span></div>
+    <div class="live-badge"><div class="live-dot"></div> LIVE DATA</div>
+  </header>
+  <div class="refresh-row">
+    <span class="last-updated" id="lastUpdated">Last updated: —</span>
+    <button class="btn-refresh" onclick="fetchAQI()">↻ Refresh</button>
+  </div>
+  <div class="main-card" id="mainCard">
+    <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div> Fetching data...</div>
+    <div class="aqi-display">
+      <div class="aqi-ring">
+        <svg viewBox="0 0 160 160">
+          <circle class="aqi-ring-bg" cx="80" cy="80" r="70"/>
+          <circle class="aqi-ring-fill" id="ringFill" cx="80" cy="80" r="70"/>
+        </svg>
+        <div class="aqi-center">
+          <div class="aqi-number" id="aqiNumber">—</div>
+          <div class="aqi-label">AQI</div>
+        </div>
+      </div>
+      <div class="aqi-status" id="aqiStatus">Loading...</div>
+    </div>
+    <div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="s-label">PM2.5</div><div class="s-value" id="pm25Value​​​​​​​​​​​​​​​​
